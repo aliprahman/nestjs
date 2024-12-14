@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, DeleteDateColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, DeleteDateColumn, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity('users')
 export class UserEntity {
@@ -25,4 +26,12 @@ export class UserEntity {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  // hook
+  @BeforeInsert()
+  setPrimaryId() {
+    this.id = uuidv4();
+  }
+
+  // relationship
 }

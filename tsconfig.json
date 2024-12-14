@@ -30,6 +30,12 @@
       "@filter/*": [
         "./src/utils/filter/*"
       ],
+      "@helper/*": [
+        "./src/utils/helper/*"
+      ],
+      "@pipe/*": [
+        "./src/utils/pipe/*"
+      ],
       "@middleware/*": [
         "./src/utils/middleware/*"
       ],

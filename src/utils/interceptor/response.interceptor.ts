@@ -26,15 +26,26 @@ export class ResponseInterceptor implements NestInterceptor {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
 
+    console.log(exception)
+    
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const detail =
+    const detail: any =
       exception instanceof InternalServerErrorException
         ? exception
         : exception.getResponse();
+
+    let message = undefined;
+    if (detail.detail) {
+      message = { message: detail.detail }
+    } else if (detail.message) {
+      message = detail.message 
+    } else {
+      message = detail
+    }
     
     const res = {
       status: false,
@@ -42,10 +53,9 @@ export class ResponseInterceptor implements NestInterceptor {
       path: request.url,
       result: {
         error: exception.message,
-        detail,
+        detail: message,
       },
     }
-    console.log(res)
     response.status(status).json(res);
   }
 

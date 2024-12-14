@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 
 import { ResponseInterceptor } from '@interceptor/response.interceptor';
 import { HttpExceptionFilter } from '@filter/http-exception.filter';
+import { CustomValidationPipe } from './utils/pipe/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true});
@@ -12,6 +13,14 @@ async function bootstrap() {
   // setup
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(new CustomValidationPipe({
+    whitelist: true,
+    transform: true,
+    stopAtFirstError: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
+  }));
 
   const port = configSerivce.get<number>('app.port')
   await app.listen(port);
