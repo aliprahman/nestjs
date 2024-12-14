@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Like, Not, Or, Repository } from 'typeorm';
 import { UserEntity } from '@/databases/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { CreateUserRequest } from '../request/create-user.request';
 import { UpdateUserRequest } from '../request/update-user.request';
+import { PaginationRequest } from '@/utils/request/pagination.request';
 
 @Injectable()
 export class MasterDataUserService {
@@ -19,8 +20,24 @@ export class MasterDataUserService {
     this.defaultPassword = 'password'
   }
 
-  async getAll(): Promise<UserEntity[]> {
-    return this.userRepository.find();
+  async getAll(query: PaginationRequest): Promise<any> {
+    const [data, total] = await this.userRepository.findAndCount({
+      where: [
+        { name: Like(`%${query.search}%`) },
+        { email: Like(`%${query.search}%`)},
+        { nik: Like(`%${query.search}%`) }
+      ],
+      take: query.perPage,
+      skip: query.page < 1 ? 0 : (query.page - 1) * query.perPage,
+      order: {
+        [query.order]: query.sort
+      }
+    });
+
+    return {
+      data,
+      total
+    }
   }
 
   async getOne(id: string): Promise<UserEntity> {
