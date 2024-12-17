@@ -36,6 +36,9 @@
       "@pipe/*": [
         "./src/utils/pipe/*"
       ],
+      "@decorator/*": [
+        "./src/utils/decorator/*"
+      ],
       "@middleware/*": [
         "./src/utils/middleware/*"
       ],

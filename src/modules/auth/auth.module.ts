@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '@/databases/entities/user.entity';
 import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from '@/utils/guard/auth.guard';
 
 @Module({
   imports: [
@@ -14,13 +16,19 @@ import { AuthService } from './service/auth.service';
       useFactory: async (configService: ConfigService) => ({
         global: true,
         secret: configService.get<string>('app.secret'),
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    }
+  ],
   exports: [TypeOrmModule],
 })
 export class AuthModule {}

@@ -8,10 +8,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    const detail =
+    const detail: any =
       exception instanceof InternalServerErrorException
         ? exception
         : exception.getResponse();
+
+    let message = undefined;
+    if (detail.detail) {
+      message = { message: detail.detail }
+    } else if (detail.message) {
+      message = detail.message 
+    } else {
+      message = detail
+    }
 
     response
       .status(status)
@@ -21,6 +30,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         path: request.url,
         result: {
           error: exception.message,
+          detail: message,
         },
       });
   }
