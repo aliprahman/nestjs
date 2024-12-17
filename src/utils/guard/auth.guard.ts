@@ -9,13 +9,17 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '@decorator/skip-auth.decorator'
+import { ClsService } from 'nestjs-cls';
+import { MasterDataUserService } from '@/modules/user/service/master-data-user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
+    private masterDataUserService: MasterDataUserService,
     private jwtService: JwtService,
     private reflector: Reflector,
     private configService: ConfigService,
+    private clsService: ClsService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -37,10 +41,10 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('app.secret'),
       });
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      request['user'] = payload;
-    } catch {
+      const user = await this.masterDataUserService.getOne(payload.sub)
+      this.clsService.set('user', user);
+    } catch (e) {
+      console.log(e)
       throw new UnauthorizedException({ detail: 'access token required'});
     }
     return true;

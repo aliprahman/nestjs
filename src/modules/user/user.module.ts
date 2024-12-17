@@ -8,6 +8,6 @@ import { MasterDataUserService } from './service/master-data-user.service';
   imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [MasterDataUserController],
   providers: [MasterDataUserService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, MasterDataUserService],
 })
 export class UserModule {}

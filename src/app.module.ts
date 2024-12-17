@@ -26,6 +26,9 @@ import { AuthModule } from '@module/auth/auth.module';
     }),
     ClsModule.forRoot({
       global: true,
+      guard: {
+        mount: true
+      }
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

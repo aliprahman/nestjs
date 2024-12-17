@@ -7,6 +7,7 @@ import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from '@/utils/guard/auth.guard';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthGuard } from '@/utils/guard/auth.guard';
       }),
       inject: [ConfigService],
     }),
+    UserModule
   ],
   controllers: [AuthController],
   providers: [
