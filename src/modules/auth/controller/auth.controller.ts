@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
 import { transformer } from '@helper/formater.helper'
 import { LoginRequest } from '../request/login.request';
 import { LoginViewModel } from '../viewmodel/login.viewmodel';
@@ -6,7 +7,8 @@ import { AuthService } from '../service/auth.service';
 import { SkipAuth } from '@/utils/decorator/skip-auth.decorator';
 import { RegisterRequest } from '../request/register.request';
 import { RegisterViewModel } from '../viewmodel/register.viewmodel';
-import { ClsService } from 'nestjs-cls';
+import { ForgotPasswordRequest } from '../request/forgot-password.request';
+import { ResetPasswordRequest } from '../request/reset-password.request';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +29,18 @@ export class AuthController {
   async register(@Body() payload: RegisterRequest): Promise<any> {
     const userRegister = await this.authService.signUp(payload);
     return transformer(RegisterViewModel, userRegister);
+  }
+
+  @SkipAuth()
+  @Post('/forgot-password')
+  async forgot(@Body() payload: ForgotPasswordRequest): Promise<any> {
+    return await this.authService.forgotPassword(payload.email);
+  }
+
+  @SkipAuth()
+  @Post('/reset-password')
+  async reset(@Body() payload: ResetPasswordRequest): Promise<any> {
+    return await this.authService.resetPassword(payload);
   }
 
   @Get('/me')
