@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {   
   MiddlewareConsumer,
   Module,
@@ -6,12 +7,17 @@ import {
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import appConfig from '@config/app.config';
-import databaseConfig from '@config/database.config';
 import { LoggerMiddleware } from '@middleware/logger.middleware';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { DataSource } from 'typeorm';
 import { ClsModule } from 'nestjs-cls';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+import appConfig from '@config/app.config';
+import databaseConfig from '@config/database.config';
+import mailConfig from './configs/mail.config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from '@module/user/user.module';
@@ -22,7 +28,7 @@ import { AuthModule } from '@module/auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, mailConfig],
     }),
     ClsModule.forRoot({
       global: true,
@@ -43,6 +49,39 @@ import { AuthModule } from '@module/auth/auth.module';
         autoLoadEntities: true,
         synchronize: false,
         namingStrategy: new SnakeNamingStrategy(),
+      }),
+      inject: [ConfigService],
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get('email.host'),
+          port: configService.get('email.port'),
+          secure: configService.get('email.secure'),
+          auth: {
+            user: configService.get('email.user'),
+            pass: configService.get('email.password')
+          }
+        },
+        defaults: {
+          from: configService.get('email.from'),
+        },
+        template: {
+          dir: path.join(__dirname, '/templates/emails/pages'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+        options: {
+          partials: {
+            dir: path.join(__dirname, '/templates/emails/partials'),
+            options: {
+              strict: true,
+            },
+          },
+        },
       }),
       inject: [ConfigService],
     }),

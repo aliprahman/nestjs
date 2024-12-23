@@ -12,6 +12,7 @@ import * as moment from 'moment';
 import { generateRandomString } from '@/utils/helper/string.helper';
 import { ForgotPasswordEntity } from '@/databases/entities/forgot-password.entity';
 import { ResetPasswordRequest } from '../request/reset-password.request';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,8 @@ export class AuthService {
     @InjectRepository(ForgotPasswordEntity)
     private forgotPasswordRepository: Repository<ForgotPasswordEntity>,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private mailService: MailerService,
   ) {}
 
   async signIn(dto: LoginRequest): Promise<{ access_token: string }> {
@@ -81,6 +83,14 @@ export class AuthService {
     await this.forgotPasswordRepository.save(forgot);
 
     // send email
+    this.mailService.sendMail({
+      to: email,
+      subject: 'Reset Password',
+      template: 'reset-password',
+      context: {
+        link: `${this.configService.get('app.webUrl')}/reset-password/${forgot.token}`
+      }
+    })
 
     return  {
       message: 'Your reset password email is heading your way.'
