@@ -91,7 +91,6 @@ export class AuthService {
     // validate
     const checkToken = await this.forgotPasswordRepository.findOne({
       where: { 
-        email: dto.email,
         token: dto.token,
         expireAt: MoreThanOrEqual(moment().toDate())
       }
@@ -101,12 +100,15 @@ export class AuthService {
     }
 
     // update password
-    const user = await this.userRepository.findOne({ where: { email: dto.email }})
+    const user = await this.userRepository.findOne({ where: { email: checkToken.email }})
     if (!user) {
       throw new NotFoundException({ detail: 'User Not Found'});
     }
-    user.password = bcrypt.hashSync(dto.password, parseInt(this.configService.get('app.salt')));;
+    user.password = bcrypt.hashSync(dto.password, parseInt(this.configService.get('app.salt')))
     await this.userRepository.save(user)
+
+    // delete token by email
+    await this.forgotPasswordRepository.softDelete(checkToken.id)
 
     return  {
       message: 'Your password has been successfully reset.'

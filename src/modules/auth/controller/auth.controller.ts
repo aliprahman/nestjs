@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
-import { ClsService } from 'nestjs-cls';
 import { transformer } from '@helper/formater.helper'
 import { LoginRequest } from '../request/login.request';
 import { LoginViewModel } from '../viewmodel/login.viewmodel';
@@ -14,7 +13,6 @@ import { ResetPasswordRequest } from '../request/reset-password.request';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private clsService: ClsService
   ) {}
 
   @SkipAuth()
@@ -42,11 +40,4 @@ export class AuthController {
   async reset(@Body() payload: ResetPasswordRequest): Promise<any> {
     return await this.authService.resetPassword(payload);
   }
-
-  @Get('/me')
-  async profile(@Request() req) {
-    const user = this.clsService.get('user')
-    return user
-  }
-
 }

@@ -1,14 +1,13 @@
 import {
-  IsNotEmpty,
-  IsString,
-  IsStrongPassword
+  IsNotEmpty, IsString,
+  IsStrongPassword,
 } from 'class-validator';
 import { IsEqualTo } from '@/utils/request/equal-param.request';
 
-export class ResetPasswordRequest {
+export class UpdatePasswordRequest {
   @IsNotEmpty()
   @IsString()
-    token: string;
+    currentPassword: string;
 
   @IsNotEmpty()
   @IsString()
@@ -19,10 +18,10 @@ export class ResetPasswordRequest {
     minSymbols: 1,
     minUppercase: 1
   })
-    password: string;
+    newPassword: string;
 
   @IsNotEmpty()
   @IsString()
-  @IsEqualTo('password')
+  @IsEqualTo('newPassword')
     confirmPassword: string;
 }
